@@ -2,7 +2,8 @@
 
 ## 
 
-1. **Clone the Repository**
+1. **_**
 
    ```sh
         docker-compose up -d
+        pip install paho-mqtt
