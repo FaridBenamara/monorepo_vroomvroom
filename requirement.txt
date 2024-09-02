@@ -1,0 +1,6 @@
+config
+Flask
+Flask-SQLAlchemy
+paho-mqtt
+psycopg2-binary
+Werkzeug
