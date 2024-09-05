@@ -1,6 +1,7 @@
 config
 Flask
 Flask-SQLAlchemy
+Flask-Cors
 paho-mqtt
 psycopg2-binary
 Werkzeug
