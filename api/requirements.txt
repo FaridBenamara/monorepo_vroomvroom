@@ -5,3 +5,4 @@ Flask-Cors
 paho-mqtt
 psycopg2-binary
 Werkzeug
+gunicorn
