@@ -1,0 +1,28 @@
+version: '3'
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "1883:1883"
+      - "15672:15672"
+      - "15675:15675"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: >
+        -rabbitmq_management.listeners.tcp.default=15672
+        -rabbitmq_mqtt.listeners.tcp.default=1883
+        -rabbitmq_web_mqtt.listeners.tcp.default=15675
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq_logs:/var/log/rabbitmq
+    command: >
+      /bin/bash -c "
+        rabbitmq-plugins enable --offline rabbitmq_mqtt rabbitmq_web_mqtt &&
+        rabbitmq-server
+      "
+
+volumes:
+  rabbitmq_data:
+  rabbitmq_logs:
