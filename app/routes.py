@@ -2,7 +2,8 @@ from flask import Blueprint, request, jsonify
 from app.models import Vehicle, Race, SensorData, StatsRace
 from app import db, mqtt_client
 from app.mqtt_handler import MQTTHandler
-
+from sqlalchemy import text
+import time
 routes = Blueprint('routes', __name__)
 
 mqtt_handler = MQTTHandler(mqtt_client)
@@ -170,3 +171,126 @@ def update_stats_race_by_id(id):
     stats_race.date = data['date']
     db.session.commit()
     return jsonify({'message': 'Stats race successfully updated', 'data': stats_race.to_dict()})
+@routes.route('/get_broker_data', methods=['GET'])
+def get_broker_data():
+    # Topics à écouter
+    topics_to_listen = ["esp32bis/speed", "esp32bis/timer"]
+
+    # Variable pour stocker les données reçues
+    broker_data = {}
+
+    # Fonction de callback temporaire pour recevoir les messages
+    def on_message(client, userdata, msg):
+        topic = msg.topic
+        payload = msg.payload.decode()
+        broker_data[topic] = payload
+        print(f"Received message: {payload} from topic: {topic}")
+
+    # S'abonner aux topics et ajouter le callback temporaire
+    for topic in topics_to_listen:
+        mqtt_client.subscribe(topic)
+        mqtt_client.message_callback_add(topic, on_message)
+
+    # Attendre les données pendant un certain temps
+    time.sleep(5)  # Ajustez ce délai selon vos besoins
+
+    # Supprimer les callbacks pour ces topics après réception
+    for topic in topics_to_listen:
+        mqtt_client.message_callback_remove(topic)
+
+    # Vérifier si des données ont été reçues
+    if broker_data:
+        return jsonify({'data': broker_data})
+    else:
+        return jsonify({'message': 'No data received from broker'}), 504
+@routes.route('/get_stats_races', methods=['GET'])
+def get_all_stats_race():
+    # Requête SQL pour obtenir les statistiques
+    query = text("""
+        SELECT
+            race_id AS sensor_data_race_id,
+            COUNT(*) AS total_entries,
+            AVG(distance) AS average_distance,
+            AVG(speed) AS average_speed,
+            MAX(distance) AS max_distance,
+            MIN(distance) AS min_distance,
+            AVG(battery) AS average_battery,
+            MAX(battery) AS max_battery,
+            MIN(date) AS start_time,
+            MAX(date) AS end_time,
+            MAX(date) - MIN(date) AS time_difference
+        FROM sensor_data
+        GROUP BY race_id
+        ORDER BY race_id;
+    """)
+
+    with db.engine.connect() as connection:
+        result = connection.execute(query).fetchall()
+
+    # Convertir les résultats en liste de dictionnaires
+    stats_race_list = [
+        {
+            'sensor_data_race_id': row[0],  # Utilisez l'index pour accéder aux valeurs
+            'total_entries': row[1],
+            'average_distance': row[2],
+            'average_speed': row[3],
+            'max_distance': row[4],
+            'min_distance': row[5],
+            'average_battery': row[6],
+            'max_battery': row[7],
+            'start_time': row[8],
+            'end_time': row[9],
+            'time_difference': row[10].total_seconds()
+        }
+        for row in result
+    ]
+
+    return jsonify(stats_race_list)
+@routes.route('/stats_every_5_seconds', methods=['GET'])
+def get_stats_every_5_seconds():
+    # Requête SQL pour obtenir les statistiques toutes les 5 secondes par race_id
+    query = text("""
+        SELECT 
+            id, 
+            race_id, 
+            distance, 
+            speed, 
+            date, 
+            battery, 
+            track
+        FROM 
+            sensor_data sd1
+        WHERE 
+            date IN (
+                SELECT 
+                    date 
+                FROM 
+                    sensor_data sd2
+                WHERE 
+                    sd1.race_id = sd2.race_id 
+                    AND sd2.date >= sd1.date - INTERVAL '5 seconds' 
+                    AND sd2.date < sd1.date + INTERVAL '5 seconds'
+            )
+        ORDER BY 
+            race_id, 
+            date;
+    """)
+
+    with db.engine.connect() as connection:
+        result = connection.execute(query).fetchall()
+
+    # Convertir les résultats en liste de dictionnaires
+    stats_list = [
+        {
+            'id': row[0],
+            'race_id': row[1],
+            'distance': row[2],
+            'speed': row[3],
+            'date': row[4],
+            'battery': row[5],
+            'track': row[6]
+        }
+        for row in result
+    ]
+
+    return jsonify(stats_list)

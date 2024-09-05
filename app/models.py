@@ -1,35 +1,34 @@
 from app import db
-from sqlalchemy.dialects.postgresql import UUID
-import uuid
+import datetime
 
 class Vehicle(db.Model):
-    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(120), nullable=False)
 
     def to_dict(self):
         return {'id': self.id, 'name': self.name}
 
 class Race(db.Model):
-    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    vehicle_id = db.Column(db.String(36), db.ForeignKey('vehicle.id'), nullable=False)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    vehicle_id = db.Column(db.Integer, db.ForeignKey('vehicle.id'), nullable=False)
     name = db.Column(db.String(120), nullable=False)
 
     def to_dict(self):
         return {'id': self.id, 'vehicle_id': self.vehicle_id, 'name': self.name}
 
 class SensorData(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    race_id = db.Column(UUID(as_uuid=True), nullable=False)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    race_id = db.Column(db.Integer, db.ForeignKey('race.id'), nullable=False)
     distance = db.Column(db.Float, nullable=False)
     speed = db.Column(db.Float, nullable=False)
-    date = db.Column(db.DateTime, nullable=False)
+    date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
     battery = db.Column(db.Float, nullable=False)
     track = db.Column(db.Float, nullable=False)
 
     def to_dict(self):
         return {
             'id': self.id,
-            'race_id': str(self.race_id),
+            'race_id': self.race_id,
             'distance': self.distance,
             'speed': self.speed,
             'date': self.date.isoformat(),
@@ -38,20 +37,20 @@ class SensorData(db.Model):
         }
 
 class StatsRace(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    race_id = db.Column(UUID(as_uuid=True), nullable=False)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    race_id = db.Column(db.Integer, db.ForeignKey('race.id'), nullable=False)
     distance = db.Column(db.Float, nullable=False)
     speed_max = db.Column(db.Float, nullable=False)
     speed_average = db.Column(db.Float, nullable=False)
     battery_max = db.Column(db.Integer, nullable=False)
     battery_min = db.Column(db.Integer, nullable=False)
     time = db.Column(db.Integer, nullable=False)
-    date = db.Column(db.DateTime, nullable=False)
+    date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
 
     def to_dict(self):
         return {
             'id': self.id,
-            'race_id': str(self.race_id),
+            'race_id': self.race_id,
             'distance': self.distance,
             'speed_max': self.speed_max,
             'speed_average': self.speed_average,
