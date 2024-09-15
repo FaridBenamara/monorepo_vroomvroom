@@ -1,75 +1,43 @@
-# Nuxt 3 Minimal Starter
+# Dashboard des Données de Course
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Un tableau de bord pour visualiser les données de course en temps réel, développé avec Nuxt.js, Vue.js et Chart.js. Il récupère et affiche les statistiques de la voiture .
 
-## Setup
+## Fonctionnalités
 
-Make sure to install the dependencies:
+- Affichage en temps réel de la vitesse, la distance, le niveau de batterie et la durée des courses.
+- Visualisation des historiques de course sous forme de graphiques interactifs.
+- Récupération des données depuis les API.
 
-```bash
-# npm
-npm install
+## Technologies
 
-# pnpm
-pnpm install
+- **Nuxt.js** 
+- **Vue.js** 
+- **Chart.js**
+- **Node.js**
+- **Websocket**
+## Installation et Configuration
 
-# yarn
-yarn install
+1. Clonez ce dépôt :
 
-# bun
-bun install
-```
+    ```bash
+    git clone link
+    ```
 
-## Development Server
+2. Installez les dépendances :
 
-Start the development server on `http://localhost:3000`:
+    ```bash
+    cd Frontend_Web\VroomVroom_front
+    npm install
+    ```
 
-```bash
-# npm
-npm run dev
+3. Lancez le serveur Nuxt :
 
-# pnpm
-pnpm run dev
+    ```bash
+    npm run dev
+    ```
+4. Lancez le serveur WebSocket :
 
-# yarn
-yarn dev
-
-# bun
-bun run dev
-```
-
-## Production
-
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm run build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm run preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+    ```bash
+    node server/server.js
+    ```
+5. Ouvrez votre navigateur à l'adresse : [http://localhost:3000](http://localhost:3000)
