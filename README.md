@@ -24,6 +24,9 @@ Voici la structure des dossiers dans le monorepo :
 - **RabbitMQ**: Configuration et scripts pour la gestion des messages avec RabbitMQ.
   - **Chemin d'accès** : `/RabbitMQ`
 
+  - **detection_ai**: Model YOLO pour la reconnaissance d'objet en video flux temps reel.
+  - **Chemin d'accès** : `/detection_ai`
+
 ## Technologies Utilisées
 
 - **Flask**: Framework pour construire l'API.
